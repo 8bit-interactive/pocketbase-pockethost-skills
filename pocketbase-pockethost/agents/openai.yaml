@@ -1,0 +1,4 @@
+interface:
+  display_name: "PocketBase Pockethost"
+  short_description: "PocketBase and Pockethost runtime guide"
+  default_prompt: "Use $pocketbase-pockethost to implement or debug PocketBase hooks, migrations, routes, and Pockethost runtime constraints."
