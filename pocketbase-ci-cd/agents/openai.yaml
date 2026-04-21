@@ -1,4 +1,0 @@
-interface:
-  display_name: "PocketBase CI CD"
-  short_description: "Local PocketBase binary and migration tooling"
-  default_prompt: "Use $pocketbase-ci-cd to download the correct PocketBase binary for this machine and document a safe local migration validation workflow."

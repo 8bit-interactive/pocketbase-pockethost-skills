@@ -31,7 +31,7 @@ The workflow uploads to the Pockethost tenant folder:
 Pockethost deployment and local PocketBase validation solve different problems.
 
 - use this skill for GitHub Actions and FTP deployment to Pockethost
-- use `$pocketbase-ci-cd` to download a local PocketBase binary and run migrations before deployment
+- use `$pocketbase` to download a local PocketBase binary and run migrations before deployment
 
 This split keeps deployment automation simple while still making it easy to validate migration behavior on the current platform before pushing a change.
 

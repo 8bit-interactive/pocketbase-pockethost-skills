@@ -18,7 +18,7 @@ This workflow is for local validation. It does not execute migrations on Pocketh
 Use the bundled downloader:
 
 ```bash
-python3 pocketbase-ci-cd/scripts/download_pocketbase.py
+python3 pocketbase/scripts/download_pocketbase.py
 ```
 
 By default it:
@@ -32,13 +32,13 @@ By default it:
 To pin a version:
 
 ```bash
-python3 pocketbase-ci-cd/scripts/download_pocketbase.py --version 0.37.1
+python3 pocketbase/scripts/download_pocketbase.py --version 0.37.1
 ```
 
 To choose a different output directory:
 
 ```bash
-python3 pocketbase-ci-cd/scripts/download_pocketbase.py --output-dir ./.tools/pocketbase
+python3 pocketbase/scripts/download_pocketbase.py --output-dir ./.tools/pocketbase
 ```
 
 ## Run Migrations Locally
@@ -48,7 +48,7 @@ Use the downloaded binary in a disposable local workspace rather than against pr
 Example:
 
 ```bash
-PB_BIN="$(python3 pocketbase-ci-cd/scripts/download_pocketbase.py --version 0.37.1 | tail -n 1)"
+PB_BIN="$(python3 pocketbase/scripts/download_pocketbase.py --version 0.37.1 | tail -n 1)"
 mkdir -p .tmp/pb-test
 "$PB_BIN" migrate up --dir ./.tmp/pb-test/pb_data --migrationsDir ./pb_migrations
 ```
@@ -77,4 +77,4 @@ Sync migration history:
 
 - Defaulting to the latest PocketBase release is convenient for quick validation.
 - Pin a specific version when reproducing a production issue or validating a release upgrade.
-- Keep the binary download step and the hosted deployment step separate. Use `$pockethost-deployment` for the GitHub Actions and FTP side.
+- Keep the binary download step and the hosted deployment step separate. Use `$pockethost` for the GitHub Actions and FTP side.

@@ -14,39 +14,32 @@ Its goal is to capture the project-specific knowledge that is easy to forget, ex
 
 ## Current skills
 
-### `pocketbase-pockethost`
+### `pocketbase`
 
-Use this skill for PocketBase and Pockethost application work, especially:
+Use this skill for PocketBase application and runtime work, especially:
 
 - PocketBase hooks and migrations
 - custom routes and auth flows
 - collection design and validation rules
 - debugging JavaScript executed by the embedded Goja runtime
+- SPA routing served from `pb_public`
 - browser-level validation with Playwright and `$playwright-cli`
+- downloading the right PocketBase binary for the current platform
+- validating migrations locally before deploying to Pockethost
 
-This skill includes a reference about PocketBase JavaScript behavior under Goja.
+This skill includes references for Goja behavior, SPA routing, and local migration testing.
 
-### `pockethost-deployment`
+### `pockethost`
 
-Use this skill for CI/CD setup and deployment workflows targeting Pockethost, especially:
+Use this skill for Pockethost hosting and deployment work, especially:
 
 - GitHub Actions FTP deployment
 - branch-based staging and production environments
 - Makefile-driven `lint`, `test`, `build`, and optional `health` checks
 - previous-commit rollback guidance after failed post-deploy health checks
+- Pockethost-specific hosting conventions and secrets
 
-This skill includes a ready-to-copy GitHub Actions workflow template.
-
-### `pocketbase-ci-cd`
-
-Use this skill for local CI/CD-oriented PocketBase tooling, especially:
-
-- downloading the right PocketBase binary for the current platform
-- validating migrations locally before deploying to Pockethost
-- reproducing migration execution outside the hosted environment
-- building repeatable local checks around PocketBase releases
-
-This skill includes a Python downloader with checksum verification and a reference for local migration testing.
+This skill includes a ready-to-copy GitHub Actions workflow template and deployment guidance for Pockethost.
 
 ## Repository layout
 

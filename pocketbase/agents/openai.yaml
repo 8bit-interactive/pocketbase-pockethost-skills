@@ -1,0 +1,4 @@
+interface:
+  display_name: "PocketBase"
+  short_description: "PocketBase runtime, routing, and local tooling"
+  default_prompt: "Use $pocketbase to implement or debug PocketBase hooks, migrations, SPA routing, Playwright testing, and local migration validation."

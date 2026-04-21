@@ -19,7 +19,7 @@ from pathlib import Path
 
 GITHUB_API_BASE = "https://api.github.com/repos/pocketbase/pocketbase"
 DEFAULT_OUTPUT_DIR = Path(".cache/pocketbase")
-USER_AGENT = "pocketbase-ci-cd-downloader"
+USER_AGENT = "pocketbase-skill-downloader"
 
 
 class DownloadError(Exception):

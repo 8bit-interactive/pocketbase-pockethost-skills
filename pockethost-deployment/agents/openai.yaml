@@ -1,4 +1,0 @@
-interface:
-  display_name: "Pockethost Deployment"
-  short_description: "GitHub Actions FTP deploy for Pockethost"
-  default_prompt: "Use $pockethost-deployment to create or update a GitHub Actions workflow that deploys a Pockethost project over FTP with environment-aware branches and rollback guidance."
