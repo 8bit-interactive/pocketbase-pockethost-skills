@@ -26,6 +26,15 @@ The workflow uploads to the Pockethost tenant folder:
 ./${POCKETHOST_TENANT_ID}/pb_public/
 ```
 
+## Local Validation Before Deploy
+
+Pockethost deployment and local PocketBase validation solve different problems.
+
+- use this skill for GitHub Actions and FTP deployment to Pockethost
+- use `$pocketbase-ci-cd` to download a local PocketBase binary and run migrations before deployment
+
+This split keeps deployment automation simple while still making it easy to validate migration behavior on the current platform before pushing a change.
+
 ## Pre-deploy Checks
 
 If the repository contains `Makefile`, `makefile`, or `GNUmakefile`, the workflow treats it as an explicit CI contract and will:

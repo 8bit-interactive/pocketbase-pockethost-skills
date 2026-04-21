@@ -9,6 +9,7 @@ Its goal is to capture the project-specific knowledge that is easy to forget, ex
 - Standardize how PocketBase and Pockethost tasks are handled.
 - Preserve runtime-specific knowledge such as PocketBase JavaScript and Goja constraints.
 - Provide copyable deployment templates for GitHub Actions and Pockethost FTP workflows.
+- Provide local tooling to download PocketBase binaries and validate migrations before deployment.
 - Reduce prompt noise by moving stable operational knowledge into reusable skill folders.
 
 ## Current skills
@@ -21,6 +22,7 @@ Use this skill for PocketBase and Pockethost application work, especially:
 - custom routes and auth flows
 - collection design and validation rules
 - debugging JavaScript executed by the embedded Goja runtime
+- browser-level validation with Playwright and `$playwright-cli`
 
 This skill includes a reference about PocketBase JavaScript behavior under Goja.
 
@@ -34,6 +36,17 @@ Use this skill for CI/CD setup and deployment workflows targeting Pockethost, es
 - previous-commit rollback guidance after failed post-deploy health checks
 
 This skill includes a ready-to-copy GitHub Actions workflow template.
+
+### `pocketbase-ci-cd`
+
+Use this skill for local CI/CD-oriented PocketBase tooling, especially:
+
+- downloading the right PocketBase binary for the current platform
+- validating migrations locally before deploying to Pockethost
+- reproducing migration execution outside the hosted environment
+- building repeatable local checks around PocketBase releases
+
+This skill includes a Python downloader with checksum verification and a reference for local migration testing.
 
 ## Repository layout
 

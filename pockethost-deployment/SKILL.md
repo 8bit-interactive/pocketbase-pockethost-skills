@@ -18,6 +18,7 @@ Prefer a simple branch-to-environment mapping with explicit secrets and a copyab
 3. Store `POCKETHOST_FTP_USERNAME`, `POCKETHOST_FTP_PASSWORD`, and `POCKETHOST_TENANT_ID` in each environment.
 4. Copy the workflow template from [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml).
 5. Read [references/github-actions-pockethost-deploy.md](references/github-actions-pockethost-deploy.md) before adapting the template.
+6. For local migration validation before deploy, use `$pocketbase-ci-cd`.
 
 ## Branch and Environment Rules
 
@@ -43,3 +44,4 @@ Prefer a simple branch-to-environment mapping with explicit secrets and a copyab
 
 - [references/github-actions-pockethost-deploy.md](references/github-actions-pockethost-deploy.md): Detailed setup notes and workflow behavior.
 - [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml): Ready-to-copy GitHub Actions workflow template.
+- `$pocketbase-ci-cd`: Local PocketBase binary download and migration validation workflow.
