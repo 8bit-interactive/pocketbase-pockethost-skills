@@ -2,6 +2,8 @@
 
 Use this reference when you need to validate PocketBase migrations locally before deploying to Pockethost.
 
+The canonical local command contract for new projects lives in [assets/Makefile](../assets/Makefile).
+
 ## Why Use a Local Binary
 
 Local migration execution helps catch problems earlier:
@@ -15,7 +17,7 @@ This workflow is for local validation. It does not execute migrations on Pocketh
 
 ## Download the Binary
 
-Use the bundled downloader:
+If you need a standalone download workflow outside the Makefile template, use the bundled downloader:
 
 ```bash
 python3 pocketbase/scripts/download_pocketbase.py
@@ -67,14 +69,16 @@ Sync migration history:
 
 ## Recommended Local Workflow
 
-1. Checkout the branch you want to validate.
-2. Download the PocketBase version you want to test.
-3. Run migrations in a disposable local environment with explicit `--dir` and `--migrationsDir` values.
-4. If needed, revert with `migrate down 1` and rerun.
-5. Only then proceed to deployment or CI changes.
+1. Copy the default [assets/Makefile](../assets/Makefile) into the project root if the project does not already define local PocketBase targets.
+2. Run `make install` to download a local PocketBase binary and create the conventional PocketBase directories.
+3. Run `make test` to smoke-test migrations in a disposable local data directory.
+4. Run `make migrate` when you intentionally want to apply migrations to the local working data directory.
+5. If needed, revert with `migrate down 1` and rerun.
+6. Only then proceed to deployment or CI changes.
 
 ## Notes
 
 - Defaulting to the latest PocketBase release is convenient for quick validation.
 - Pin a specific version when reproducing a production issue or validating a release upgrade.
+- PocketBase uses `--dir` for the data directory flag. Do not document `--dataDir` in new examples.
 - Keep the binary download step and the hosted deployment step separate. Use `$pockethost` for the GitHub Actions and FTP side.

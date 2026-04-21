@@ -2,9 +2,10 @@
 
 Use this reference when a repository needs a standard GitHub Actions workflow for deploying to Pockethost over FTP.
 
-The canonical template lives in:
+The canonical templates live in:
 
 - [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml)
+- [assets/Makefile](../assets/Makefile)
 
 ## Deployment Model
 
@@ -32,6 +33,7 @@ Pockethost deployment and local PocketBase validation solve different problems.
 
 - use this skill for GitHub Actions and FTP deployment to Pockethost
 - use `$pocketbase` to download a local PocketBase binary and run migrations before deployment
+- use [assets/Makefile](../assets/Makefile) as the default project contract for `install`, `migrate`, `lint`, `dev`, `test`, `build`, and `health`
 
 This split keeps deployment automation simple while still making it easy to validate migration behavior on the current platform before pushing a change.
 
@@ -50,6 +52,7 @@ If the repository has no makefile, all Make-based steps are skipped.
 
 - if the target exists, the workflow waits 5 seconds after deployment and runs it
 - if the target does not exist, the workflow skips the health check
+- the default template resolves the instance URL from `HEALTHCHECK_BASE_URL` or `POCKETHOST_TENANT_ID`
 
 ## Rollback Behavior
 
@@ -87,6 +90,10 @@ This makes the template usable for:
 - PocketBase-only repositories
 - frontend-only repositories publishing into `pb_public`
 - mixed repositories combining hooks, migrations, and public assets
+
+If the frontend uses the PocketBase SPA routing convention, keep `/page` reserved for navigation and emit compiled files under `pb_public/assets/` or `pb_public/dist/`.
+
+The copyable `Makefile` template enforces this by failing if `pb_public/page/` exists physically.
 
 ## Adapting the Template
 

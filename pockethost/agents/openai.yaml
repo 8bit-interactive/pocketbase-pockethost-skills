@@ -1,4 +1,4 @@
 interface:
   display_name: "Pockethost"
-  short_description: "Pockethost hosting and deployment guide"
-  default_prompt: "Use $pockethost to create or update a Pockethost deployment workflow with GitHub Actions, FTP, environments, and rollback guidance."
+  short_description: "Pockethost hosting, health checks, and deployment guide"
+  default_prompt: "Use $pockethost to create or update a Pockethost deployment workflow with GitHub Actions, FTP, environments, Makefile health checks, and rollback guidance."

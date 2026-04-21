@@ -9,6 +9,7 @@ Its goal is to capture the project-specific knowledge that is easy to forget, ex
 - Standardize how PocketBase and Pockethost tasks are handled.
 - Preserve runtime-specific knowledge such as PocketBase JavaScript and Goja constraints.
 - Provide copyable deployment templates for GitHub Actions and Pockethost FTP workflows.
+- Provide copyable `Makefile` templates for local PocketBase and Pockethost commands.
 - Provide local tooling to download PocketBase binaries and validate migrations before deployment.
 - Reduce prompt noise by moving stable operational knowledge into reusable skill folders.
 
@@ -26,8 +27,16 @@ Use this skill for PocketBase application and runtime work, especially:
 - browser-level validation with Playwright and `$playwright-cli`
 - downloading the right PocketBase binary for the current platform
 - validating migrations locally before deploying to Pockethost
+- copyable `Makefile` conventions for `install`, `migrate`, `lint`, `dev`, and `test`
 
-This skill includes references for Goja behavior, SPA routing, and local migration testing.
+This skill includes references for Goja behavior, SPA routing, local migration testing, and a copyable `Makefile` template.
+
+The default SPA convention is:
+
+- navigation lives under `/page`
+- `index.html` stays at the root of `pb_public`
+- compiled assets live under `/assets` or `/dist`
+- `pb_public/page/` is intentionally discouraged
 
 ### `pockethost`
 
@@ -38,8 +47,9 @@ Use this skill for Pockethost hosting and deployment work, especially:
 - Makefile-driven `lint`, `test`, `build`, and optional `health` checks
 - previous-commit rollback guidance after failed post-deploy health checks
 - Pockethost-specific hosting conventions and secrets
+- copyable `Makefile` conventions for local PocketBase tasks and hosted health checks
 
-This skill includes a ready-to-copy GitHub Actions workflow template and deployment guidance for Pockethost.
+This skill includes a ready-to-copy GitHub Actions workflow template, a copyable `Makefile`, and deployment guidance for Pockethost.
 
 ## Repository layout
 
