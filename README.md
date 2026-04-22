@@ -52,6 +52,65 @@ Use this skill for Pockethost hosting and deployment work, especially:
 
 This skill includes a centralized reusable GitHub Actions workflow, a minimal caller template, a standalone fallback workflow, a copyable `Makefile`, and deployment guidance for Pockethost.
 
+## Reusable GitHub Actions
+
+The default Pockethost deployment model is now:
+
+1. keep the deployment logic centralized in this repository
+2. call it from application repositories with a tiny workflow
+3. keep environment-specific secrets in the consuming repository
+4. rely on branch conventions instead of local workflow customization
+
+The reusable workflow is published from:
+
+- `.github/workflows/pockethost-deploy.yml`
+
+The stable caller reference is:
+
+```yaml
+jobs:
+  deploy:
+    uses: 8bit-interactive/pocketbase-pockethost-skills/.github/workflows/pockethost-deploy.yml@v1
+    secrets: inherit
+```
+
+Default branch mapping:
+
+- `main` -> GitHub Environment `production`
+- `master` -> GitHub Environment `production`
+- `staging` -> GitHub Environment `staging`
+
+Expected GitHub Environment secrets:
+
+- `POCKETHOST_FTP_USERNAME`
+- `POCKETHOST_FTP_PASSWORD`
+- `POCKETHOST_TENANT_ID`
+
+The workflow enforces a simple repository contract:
+
+- if a makefile exists, it must expose `lint`, `test`, and `build`
+- if `install` exists, it is run before `lint`, `test`, and `build`
+- `health` is optional
+- only directories that exist in the repository are deployed
+
+For `pb_public`, the workflow tries the tenant-scoped FTP path first and then automatically falls back to `pb_public/` when the server is already rooted at the instance directory.
+
+## Companion Repositories
+
+This repository now has two companion repositories:
+
+- `8bit-interactive/pockethost-tools-demo`: a live consumer repository used to validate the reusable workflow end-to-end
+- `8bit-interactive/pockethost-site-template`: the starter template repository meant to be used via GitHub `Use this template`
+
+The template repository ships with:
+
+- a minimal caller workflow pinned to `@v1`
+- a `Makefile` matching the shared CI contract
+- a `main` branch for production content
+- a `staging` branch with distinct placeholder content for easy environment verification
+
+Use the template repository when you want a ready-made small-site starting point. Use this repository when you want the shared deployment logic, templates, and skill documentation.
+
 ## Repository layout
 
 Each skill lives in its own directory and usually contains:
