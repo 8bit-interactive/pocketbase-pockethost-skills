@@ -122,6 +122,7 @@ The shared reusable workflow expects the caller repository to provide:
 - GitHub Environments named `production` and `staging`
 - environment secrets named `POCKETHOST_FTP_USERNAME`, `POCKETHOST_FTP_PASSWORD`, and `POCKETHOST_TENANT_ID`
 - a caller workflow that invokes the reusable workflow
+- `secrets: inherit` in the caller job so the reusable workflow receives the caller repository secrets
 
 The reusable workflow also supports one optional input:
 
