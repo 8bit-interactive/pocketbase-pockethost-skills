@@ -43,13 +43,14 @@ The default SPA convention is:
 Use this skill for Pockethost hosting and deployment work, especially:
 
 - GitHub Actions FTP deployment
+- reusable GitHub Actions workflows hosted by this repository
 - branch-based staging and production environments
 - Makefile-driven `lint`, `test`, `build`, and optional `health` checks
 - previous-commit rollback guidance after failed post-deploy health checks
 - Pockethost-specific hosting conventions and secrets
-- copyable `Makefile` conventions for local PocketBase tasks and hosted health checks
+- copyable caller workflow and `Makefile` conventions for local PocketBase tasks and hosted health checks
 
-This skill includes a ready-to-copy GitHub Actions workflow template, a copyable `Makefile`, and deployment guidance for Pockethost.
+This skill includes a centralized reusable GitHub Actions workflow, a minimal caller template, a standalone fallback workflow, a copyable `Makefile`, and deployment guidance for Pockethost.
 
 ## Repository layout
 

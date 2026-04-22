@@ -4,8 +4,26 @@ Use this reference when a repository needs a standard GitHub Actions workflow fo
 
 The canonical templates live in:
 
+- [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml)
 - [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml)
+- [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml)
 - [assets/Makefile](../assets/Makefile)
+
+## Default Consumption Model
+
+The default convention is to keep the deployment logic centralized in this repository and copy only a tiny caller workflow into the application repository.
+
+Use [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml) in downstream repositories. It delegates to [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml).
+
+This keeps the application repository almost configuration-free:
+
+- branch mapping stays standardized
+- FTP deployment behavior stays standardized
+- rollback behavior stays standardized
+- Makefile contract stays standardized
+- improvements to the shared workflow can be published once in this repository
+
+Use [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) only when a repository must vendor the full workflow locally.
 
 ## Deployment Model
 
@@ -42,9 +60,10 @@ This split keeps deployment automation simple while still making it easy to vali
 If the repository contains `Makefile`, `makefile`, or `GNUmakefile`, the workflow treats it as an explicit CI contract and will:
 
 1. verify that `lint`, `test`, and `build` targets exist
-2. run `make lint`
-3. run `make test`
-4. run `make build`
+2. run `make install` when that target exists
+3. run `make lint`
+4. run `make test`
+5. run `make build`
 
 If the repository has no makefile, all Make-based steps are skipped.
 
@@ -64,9 +83,10 @@ Behavior:
 2. wait 5 seconds
 3. if `make health` exists, run it
 4. if health fails, checkout `github.event.before`
-5. rebuild the previous commit if a makefile exists
-6. rerun the same FTP sync steps
-7. fail the workflow to keep the failed deployment visible
+5. rerun `make install` if the previous commit exposes that target
+6. rebuild the previous commit if a makefile exists
+7. rerun the same FTP sync steps
+8. fail the workflow to keep the failed deployment visible
 
 Important limitations:
 
@@ -95,6 +115,23 @@ If the frontend uses the PocketBase SPA routing convention, keep `/page` reserve
 
 The copyable `Makefile` template enforces this by failing if `pb_public/page/` exists physically.
 
+## Reusable Workflow Contract
+
+The shared reusable workflow expects the caller repository to provide:
+
+- GitHub Environments named `production` and `staging`
+- environment secrets named `POCKETHOST_FTP_USERNAME`, `POCKETHOST_FTP_PASSWORD`, and `POCKETHOST_TENANT_ID`
+- a caller workflow that invokes the reusable workflow
+
+The reusable workflow also supports one optional input:
+
+- `working-directory`: defaults to `.`, use it only when the PocketBase or Pockethost app lives in a subdirectory
+
+By default, the reusable workflow rejects unsupported branches. The convention is intentionally strict:
+
+- `main` and `master` are the only production branches
+- `staging` is the only staging branch
+
 ## Adapting the Template
 
 Keep these parts unchanged unless the hosting setup really differs:
@@ -106,6 +143,8 @@ Keep these parts unchanged unless the hosting setup really differs:
 
 Adjust only when needed:
 
+- repository ref in the caller workflow, preferably pinned to a release tag or commit SHA
+- `working-directory` if the application does not live at the repository root
 - build implementation inside `make build`
 - health logic inside `make health`
 - additional exclusions for uploaded directories
@@ -126,3 +165,5 @@ POCKETHOST_TENANT_ID
 ```
 
 The workflow template intentionally uses environment-scoped secrets rather than per-repository suffixed secret names.
+
+Ensure the repository Actions settings allow reusable workflows from this repository.
