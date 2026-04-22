@@ -43,35 +43,35 @@ The default SPA convention is:
 Use this skill for Pockethost hosting and deployment work, especially:
 
 - GitHub Actions FTP deployment
-- reusable GitHub Actions workflows hosted by this repository
+- copyable GitHub Actions workflow templates hosted by this repository
 - branch-based staging and production environments
 - Makefile-driven `lint`, `test`, `build`, and optional `health` checks
 - previous-commit rollback guidance after failed post-deploy health checks
 - Pockethost-specific hosting conventions and secrets
-- copyable caller workflow and `Makefile` conventions for local PocketBase tasks and hosted health checks
+- copyable deployment workflow and `Makefile` conventions for local PocketBase tasks and hosted health checks
 
-This skill includes a centralized reusable GitHub Actions workflow, a minimal caller template, a standalone fallback workflow, a copyable `Makefile`, and deployment guidance for Pockethost.
+This skill includes a centralized workflow template, a standalone deployment workflow, a copyable `Makefile`, and deployment guidance for Pockethost.
 
-## Reusable GitHub Actions
+## GitHub Actions Template
 
 The default Pockethost deployment model is now:
 
-1. keep the deployment logic centralized in this repository
-2. call it from application repositories with a tiny workflow
-3. keep environment-specific secrets in the consuming repository
+1. keep the deployment template centralized in this repository
+2. copy the standalone workflow into the application repository
+3. keep environment-specific secrets and vars in the consuming repository
 4. rely on branch conventions instead of local workflow customization
 
-The reusable workflow is published from:
+The copyable workflow template is published from:
 
-- `.github/workflows/pockethost-deploy.yml`
+- `pockethost/assets/github-actions-pockethost-deploy.yml`
 
-The stable caller reference is:
+The default workflow is local to the consuming repository because GitHub Environment-scoped values are resolved reliably there:
 
 ```yaml
 jobs:
   deploy:
-    uses: 8bit-interactive/pocketbase-pockethost-skills/.github/workflows/pockethost-deploy.yml@v1
-    secrets: inherit
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
 ```
 
 Default branch mapping:
@@ -80,11 +80,11 @@ Default branch mapping:
 - `master` -> GitHub Environment `production`
 - `staging` -> GitHub Environment `staging`
 
-Expected GitHub Environment secrets:
+Expected GitHub Environment configuration:
 
 - `POCKETHOST_FTP_USERNAME`
 - `POCKETHOST_FTP_PASSWORD`
-- `POCKETHOST_TENANT_ID`
+- `POCKETHOST_TENANT_ID` as an Environment variable or secret
 
 The workflow enforces a simple repository contract:
 
@@ -99,12 +99,12 @@ For `pb_public`, the workflow tries the tenant-scoped FTP path first and then au
 
 This repository now has two companion repositories:
 
-- `8bit-interactive/pockethost-tools-demo`: a live consumer repository used to validate the reusable workflow end-to-end
+- `8bit-interactive/pockethost-tools-demo`: a live consumer repository used to validate the deployment template end-to-end
 - `8bit-interactive/pockethost-site-template`: the starter template repository meant to be used via GitHub `Use this template`
 
 The template repository ships with:
 
-- a minimal caller workflow pinned to `@v1`
+- a local deployment workflow copied from this repository
 - a `Makefile` matching the shared CI contract
 - a `main` branch for production content
 - a `staging` branch with distinct placeholder content for easy environment verification

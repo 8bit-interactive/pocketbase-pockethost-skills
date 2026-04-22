@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     env:
-      POCKETHOST_TENANT_ID: ${{ secrets.POCKETHOST_TENANT_ID }}
+      POCKETHOST_TENANT_ID: ${{ vars.POCKETHOST_TENANT_ID != '' && vars.POCKETHOST_TENANT_ID || secrets.POCKETHOST_TENANT_ID }}
 
     steps:
       - name: Checkout current commit
@@ -133,7 +133,7 @@ jobs:
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ./pb_hooks/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_hooks/
+          server-dir: ${{ env.POCKETHOST_TENANT_ID }}/pb_hooks/
           state-name: .ftp-deploy-state-pb_hooks-${{ github.ref_name }}.json
           exclude: |
             **/.git*
@@ -149,7 +149,7 @@ jobs:
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ./pb_migrations/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_migrations/
+          server-dir: ${{ env.POCKETHOST_TENANT_ID }}/pb_migrations/
           state-name: .ftp-deploy-state-pb_migrations-${{ github.ref_name }}.json
           exclude: |
             **/.git*
@@ -167,7 +167,7 @@ jobs:
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ./pb_public/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_public/
+          server-dir: ${{ env.POCKETHOST_TENANT_ID }}/pb_public/
           state-name: .ftp-deploy-state-pb_public-${{ github.ref_name }}.json
           exclude: |
             **/.git*
@@ -288,7 +288,7 @@ jobs:
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ./pb_hooks/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_hooks/
+          server-dir: ${{ env.POCKETHOST_TENANT_ID }}/pb_hooks/
           state-name: .ftp-deploy-state-pb_hooks-${{ github.ref_name }}.json
           exclude: |
             **/.git*
@@ -304,7 +304,7 @@ jobs:
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ./pb_migrations/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_migrations/
+          server-dir: ${{ env.POCKETHOST_TENANT_ID }}/pb_migrations/
           state-name: .ftp-deploy-state-pb_migrations-${{ github.ref_name }}.json
           exclude: |
             **/.git*
@@ -320,7 +320,7 @@ jobs:
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ./pb_public/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_public/
+          server-dir: ${{ env.POCKETHOST_TENANT_ID }}/pb_public/
           state-name: .ftp-deploy-state-pb_public-${{ github.ref_name }}.json
           exclude: |
             **/.git*
@@ -345,4 +345,4 @@ jobs:
         if: steps.health.outcome != 'failure'
         run: |
           echo "Deployment completed successfully."
-          echo "Instance: https://${{ secrets.POCKETHOST_TENANT_ID }}.pockethost.io"
+          echo "Instance: https://${POCKETHOST_TENANT_ID}.pockethost.io"

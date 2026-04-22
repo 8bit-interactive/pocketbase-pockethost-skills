@@ -15,10 +15,10 @@ Prefer a simple branch-to-environment mapping with explicit secrets and a copyab
 
 1. Confirm the repository is deployed to Pockethost over FTP.
 2. Use GitHub Environments named `production` and `staging`.
-3. Store `POCKETHOST_FTP_USERNAME`, `POCKETHOST_FTP_PASSWORD`, and `POCKETHOST_TENANT_ID` in each environment.
-4. Copy the caller workflow template from [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml).
-5. Reuse the centralized workflow from [../.github/workflows/pockethost-deploy.yml](../.github/workflows/pockethost-deploy.yml) as the default convention.
-6. Use [assets/github-actions-pockethost-deploy-standalone.yml](assets/github-actions-pockethost-deploy-standalone.yml) only when the project cannot depend on a reusable workflow from this repository.
+3. Store `POCKETHOST_FTP_USERNAME` and `POCKETHOST_FTP_PASSWORD` as environment secrets.
+4. Store `POCKETHOST_TENANT_ID` as an environment variable or secret.
+5. Copy the standalone workflow template from [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml).
+6. Keep [../.github/workflows/pockethost-deploy.yml](../.github/workflows/pockethost-deploy.yml) only as a centralized reference workflow.
 7. Use [assets/Makefile](assets/Makefile) as the default local `Makefile` template when the project needs `install`, `migrate`, `lint`, `dev`, `test`, `build`, and `health` targets.
 8. Read [references/github-actions-pockethost-deploy.md](references/github-actions-pockethost-deploy.md) before adapting the template.
 9. For PocketBase application logic, hooks, SPA routing, or local migration validation, use `$pocketbase`.
@@ -28,8 +28,9 @@ Prefer a simple branch-to-environment mapping with explicit secrets and a copyab
 - Deploy `main` to `production`.
 - Deploy `master` to `production`.
 - Deploy `staging` to `staging`.
-- Default to the reusable workflow hosted in this repository.
-- Keep the secret names identical across environments.
+- Default to the local workflow template copied from this repository.
+- Keep the FTP secret names identical across environments.
+- Resolve `POCKETHOST_TENANT_ID` from environment vars before falling back to environment secrets.
 - If a makefile exists, require `lint`, `test`, and `build` before deployment.
 - If an `install` target exists, run it before `lint`, `test`, and `build`.
 - Treat `health` as an optional target and run it only if present.
@@ -39,8 +40,8 @@ Prefer a simple branch-to-environment mapping with explicit secrets and a copyab
 ## References
 
 - [references/github-actions-pockethost-deploy.md](references/github-actions-pockethost-deploy.md): Detailed setup notes and workflow behavior.
-- [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml): Minimal caller workflow template for downstream repositories.
-- [../.github/workflows/pockethost-deploy.yml](../.github/workflows/pockethost-deploy.yml): Central reusable GitHub Actions workflow.
-- [assets/github-actions-pockethost-deploy-standalone.yml](assets/github-actions-pockethost-deploy-standalone.yml): Full standalone fallback for repositories that cannot call reusable workflows.
+- [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml): Canonical standalone workflow template for downstream repositories.
+- [../.github/workflows/pockethost-deploy.yml](../.github/workflows/pockethost-deploy.yml): Central reusable GitHub Actions workflow kept as a reference.
+- [assets/github-actions-pockethost-deploy-standalone.yml](assets/github-actions-pockethost-deploy-standalone.yml): Alias of the standalone workflow template.
 - [assets/Makefile](assets/Makefile): Copyable Makefile template with local PocketBase tasks and optional hosted health checks.
 - `$pocketbase`: PocketBase runtime, testing, and local migration validation guidance.

@@ -4,17 +4,17 @@ Use this reference when a repository needs a standard GitHub Actions workflow fo
 
 The canonical templates live in:
 
-- [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml)
 - [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml)
 - [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml)
+- [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml)
 - [assets/Makefile](../assets/Makefile)
 
 ## Default Consumption Model
 
-The default convention is to keep the deployment logic centralized in this repository and copy only a tiny caller workflow into the application repository.
+The default convention is to keep the deployment template centralized in this repository and copy the standalone workflow into the application repository.
 
-Use [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml) in downstream repositories. It delegates to [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml).
-The default caller template is pinned to the reusable workflow tag `v1`.
+Use [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml) in downstream repositories.
+It is intentionally local to the consuming repository so GitHub Environment-scoped secrets and vars are resolved directly by the job.
 
 This keeps the application repository almost configuration-free:
 
@@ -24,9 +24,9 @@ This keeps the application repository almost configuration-free:
 - Makefile contract stays standardized
 - FTP sync state files are stored as flat files inside each deployed local directory
 - `pb_public` deployment automatically tries the tenant directory first and then `pb_public/` as an instance-root fallback
-- improvements to the shared workflow can be published once in this repository
+- improvements to the shared template can be copied from this repository
 
-Use [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) only when a repository must vendor the full workflow locally.
+The standalone alias at [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) exists for clarity and mirrors the same template.
 
 ## Deployment Model
 
@@ -35,10 +35,10 @@ This skill standardizes the following rules:
 - `main` deploys to the GitHub Environment `production`
 - `master` deploys to the GitHub Environment `production`
 - `staging` deploys to the GitHub Environment `staging`
-- each environment stores the same secret names:
+- each environment stores the same FTP secret names:
   - `POCKETHOST_FTP_USERNAME`
   - `POCKETHOST_FTP_PASSWORD`
-  - `POCKETHOST_TENANT_ID`
+- each environment stores `POCKETHOST_TENANT_ID` as a variable or secret
 
 The workflow uploads to the Pockethost tenant folder:
 
@@ -118,23 +118,24 @@ If the frontend uses the PocketBase SPA routing convention, keep `/page` reserve
 
 The copyable `Makefile` template enforces this by failing if `pb_public/page/` exists physically.
 
-## Reusable Workflow Contract
+## Template Contract
 
-The shared reusable workflow expects the caller repository to provide:
+The standalone workflow template expects the consuming repository to provide:
 
 - GitHub Environments named `production` and `staging`
-- environment secrets named `POCKETHOST_FTP_USERNAME`, `POCKETHOST_FTP_PASSWORD`, and `POCKETHOST_TENANT_ID`
-- a caller workflow that invokes the reusable workflow
-- `secrets: inherit` in the caller job so the reusable workflow receives the caller repository secrets
+- environment secrets named `POCKETHOST_FTP_USERNAME` and `POCKETHOST_FTP_PASSWORD`
+- `POCKETHOST_TENANT_ID` as an environment variable or secret
 
-The reusable workflow also supports one optional input:
-
-- `working-directory`: defaults to `.`, use it only when the PocketBase or Pockethost app lives in a subdirectory
-
-By default, the reusable workflow rejects unsupported branches. The convention is intentionally strict:
+By default, the template rejects unsupported branches. The convention is intentionally strict:
 
 - `main` and `master` are the only production branches
 - `staging` is the only staging branch
+
+## Central Reusable Workflow
+
+The reusable workflow in [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml) is still kept in this repository as a centralized reference.
+
+Use it only when the consuming repository does not need GitHub Environment-scoped values from the caller.
 
 ## Adapting the Template
 
@@ -165,9 +166,13 @@ Add these secrets to each environment:
 ```text
 POCKETHOST_FTP_USERNAME
 POCKETHOST_FTP_PASSWORD
-POCKETHOST_TENANT_ID
 ```
 
-The workflow template intentionally uses environment-scoped secrets rather than per-repository suffixed secret names.
+Add `POCKETHOST_TENANT_ID` as either:
 
-Ensure the repository Actions settings allow reusable workflows from this repository.
+```text
+an Environment variable
+or an Environment secret
+```
+
+The workflow template intentionally uses environment-scoped configuration rather than per-repository suffixed names.
