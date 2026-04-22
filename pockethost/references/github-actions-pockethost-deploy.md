@@ -14,6 +14,7 @@ The canonical templates live in:
 The default convention is to keep the deployment logic centralized in this repository and copy only a tiny caller workflow into the application repository.
 
 Use [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml) in downstream repositories. It delegates to [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml).
+The default caller template is pinned to the reusable workflow tag `v1`.
 
 This keeps the application repository almost configuration-free:
 
