@@ -183,7 +183,7 @@ jobs:
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_hooks/
           server-dir: ./${{ secrets.POCKETHOST_TENANT_ID }}/pb_hooks/
-          state-name: .ftp-deploy-sync-state/pb_hooks-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
+          state-name: .ftp-deploy-state-pb_hooks-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
             **/.git*/**
@@ -199,7 +199,7 @@ jobs:
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_migrations/
           server-dir: ./${{ secrets.POCKETHOST_TENANT_ID }}/pb_migrations/
-          state-name: .ftp-deploy-sync-state/pb_migrations-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
+          state-name: .ftp-deploy-state-pb_migrations-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
             **/.git*/**
@@ -215,7 +215,7 @@ jobs:
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_public/
           server-dir: ./${{ secrets.POCKETHOST_TENANT_ID }}/pb_public/
-          state-name: .ftp-deploy-sync-state/pb_public-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
+          state-name: .ftp-deploy-state-pb_public-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
             **/.git*/**
@@ -316,7 +316,7 @@ jobs:
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_hooks/
           server-dir: ./${{ secrets.POCKETHOST_TENANT_ID }}/pb_hooks/
-          state-name: .ftp-deploy-sync-state/pb_hooks-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
+          state-name: .ftp-deploy-state-pb_hooks-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
             **/.git*/**
@@ -332,7 +332,7 @@ jobs:
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_migrations/
           server-dir: ./${{ secrets.POCKETHOST_TENANT_ID }}/pb_migrations/
-          state-name: .ftp-deploy-sync-state/pb_migrations-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
+          state-name: .ftp-deploy-state-pb_migrations-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
             **/.git*/**
@@ -348,7 +348,7 @@ jobs:
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_public/
           server-dir: ./${{ secrets.POCKETHOST_TENANT_ID }}/pb_public/
-          state-name: .ftp-deploy-sync-state/pb_public-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
+          state-name: .ftp-deploy-state-pb_public-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
             **/.git*/**

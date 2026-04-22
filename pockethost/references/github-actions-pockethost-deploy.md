@@ -21,6 +21,7 @@ This keeps the application repository almost configuration-free:
 - FTP deployment behavior stays standardized
 - rollback behavior stays standardized
 - Makefile contract stays standardized
+- FTP sync state files are stored as flat files inside each deployed local directory
 - improvements to the shared workflow can be published once in this repository
 
 Use [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) only when a repository must vendor the full workflow locally.
