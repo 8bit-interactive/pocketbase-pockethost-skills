@@ -22,6 +22,7 @@ This keeps the application repository almost configuration-free:
 - rollback behavior stays standardized
 - Makefile contract stays standardized
 - FTP sync state files are stored as flat files inside each deployed local directory
+- `pb_public` deployment automatically tries the tenant directory first and then `pb_public/` as an instance-root fallback
 - improvements to the shared workflow can be published once in this repository
 
 Use [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) only when a repository must vendor the full workflow locally.
