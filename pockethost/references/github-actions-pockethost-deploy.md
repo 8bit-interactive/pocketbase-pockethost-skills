@@ -41,9 +41,9 @@ This skill standardizes the following rules:
 The workflow uploads to the Pockethost tenant folder:
 
 ```text
-./${POCKETHOST_TENANT_ID}/pb_hooks/
-./${POCKETHOST_TENANT_ID}/pb_migrations/
-./${POCKETHOST_TENANT_ID}/pb_public/
+${POCKETHOST_TENANT_ID}/pb_hooks/
+${POCKETHOST_TENANT_ID}/pb_migrations/
+${POCKETHOST_TENANT_ID}/pb_public/
 ```
 
 ## Local Validation Before Deploy
