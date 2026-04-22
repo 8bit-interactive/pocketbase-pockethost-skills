@@ -23,7 +23,7 @@ This keeps the application repository almost configuration-free:
 - rollback behavior stays standardized
 - Makefile contract stays standardized
 - FTP sync state files are stored as flat files inside each deployed local directory
-- `pb_public` deployment automatically tries the tenant directory first and then `pb_public/` as an instance-root fallback
+- `pb_public` deployment resolves a single remote directory before uploading, which keeps GitHub Actions statuses clean
 - improvements to the shared template can be copied from this repository
 
 The standalone alias at [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) exists for clarity and mirrors the same template.

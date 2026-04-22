@@ -93,7 +93,7 @@ The workflow enforces a simple repository contract:
 - `health` is optional
 - only directories that exist in the repository are deployed
 
-For `pb_public`, the workflow tries the tenant-scoped FTP path first and then automatically falls back to `pb_public/` when the server is already rooted at the instance directory.
+For `pb_public`, the workflow resolves a single FTP target before deployment: it uses `${POCKETHOST_TENANT_ID}/pb_public/` when `POCKETHOST_TENANT_ID` is available, otherwise it uses `pb_public/`.
 
 ## Companion Repositories
 

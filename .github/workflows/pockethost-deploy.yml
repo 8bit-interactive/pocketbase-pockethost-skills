@@ -175,6 +175,32 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
         run: make build
 
+      - name: Validate tenant-scoped FTP configuration
+        if: steps.detect.outputs.has_pb_hooks == 'true' || steps.detect.outputs.has_pb_migrations == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${POCKETHOST_TENANT_ID:-}" ]; then
+            echo "POCKETHOST_TENANT_ID is required when deploying pb_hooks or pb_migrations." >&2
+            exit 1
+          fi
+
+      - name: Resolve pb_public FTP directory
+        id: resolve_pb_public
+        if: steps.detect.outputs.has_pb_public == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -n "${POCKETHOST_TENANT_ID:-}" ]; then
+            echo "server_dir=${POCKETHOST_TENANT_ID}/pb_public/" >> "$GITHUB_OUTPUT"
+            echo "mode=tenant" >> "$GITHUB_OUTPUT"
+          else
+            echo "server_dir=pb_public/" >> "$GITHUB_OUTPUT"
+            echo "mode=root" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy pb_hooks via FTP
         if: steps.detect.outputs.has_pb_hooks == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -208,45 +234,19 @@ jobs:
             README.md
 
       - name: Deploy pb_public via FTP using tenant directory
-        id: deploy_pb_public_tenant
-        if: steps.detect.outputs.has_pb_public == 'true' && env.POCKETHOST_TENANT_ID != ''
-        continue-on-error: true
+        if: steps.detect.outputs.has_pb_public == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftp.pockethost.io
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_public/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_public/
+          server-dir: ${{ steps.resolve_pb_public.outputs.server_dir }}
           state-name: .ftp-deploy-state-pb_public-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
-
-      - name: Deploy pb_public via FTP using instance root fallback
-        id: deploy_pb_public_root
-        if: steps.detect.outputs.has_pb_public == 'true' && (steps.deploy_pb_public_tenant.outcome == 'failure' || steps.deploy_pb_public_tenant.outcome == 'skipped')
-        continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ftp.pockethost.io
-          username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
-          password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
-          local-dir: ${{ inputs.working-directory }}/pb_public/
-          server-dir: pb_public/
-          state-name: .ftp-deploy-state-pb_public-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-
-      - name: Fail when pb_public deployment paths were rejected
-        if: steps.detect.outputs.has_pb_public == 'true' && steps.deploy_pb_public_tenant.outcome == 'failure' && steps.deploy_pb_public_root.outcome == 'failure'
-        shell: bash
-        run: |
-          echo "pb_public deployment failed with both tenant-directory and instance-root FTP paths." >&2
-          exit 1
 
       - name: Wait for deployment to settle
         run: sleep 5
@@ -374,7 +374,7 @@ jobs:
           username: ${{ secrets.POCKETHOST_FTP_USERNAME }}
           password: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
           local-dir: ${{ inputs.working-directory }}/pb_public/
-          server-dir: ${{ secrets.POCKETHOST_TENANT_ID }}/pb_public/
+          server-dir: ${{ steps.resolve_pb_public.outputs.server_dir }}
           state-name: .ftp-deploy-state-pb_public-${{ needs.plan.outputs.branch_name }}-${{ github.job }}.json
           exclude: |
             **/.git*
