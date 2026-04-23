@@ -1,3 +1,6 @@
+# Zero-build default:
+# edit pb_public/index.html and pb_public/assets/site.css.
+# Leave this file unchanged unless the project adds hooks, migrations, or a custom build.
 SHELL := /bin/sh
 
 PB ?= $(CURDIR)/pocketbase
@@ -98,7 +101,7 @@ test:
 
 build:
 	@$(MAKE) guard-spa-layout
-	@echo "No build step is required by default. Override 'build' if your project needs a frontend or asset build."
+	@echo "No build step is required by default. Keep editing pb_public/ directly unless the project needs a custom build."
 
 health:
 	@base_url="$(HEALTHCHECK_BASE_URL)"; \
@@ -108,6 +111,7 @@ health:
 	fi; \
 	if [ -z "$$base_url" ]; then \
 		echo "Set HEALTHCHECK_BASE_URL or POCKETHOST_TENANT_ID before running 'make health'." >&2; \
+		echo "For GitHub Actions, add POCKETHOST_TENANT_ID to the active GitHub Environment." >&2; \
 		exit 1; \
 	fi; \
 	health_url="$${base_url%/}$(HEALTHCHECK_PATH)"; \

@@ -108,6 +108,7 @@ The template repository ships with:
 - a `Makefile` matching the shared CI contract
 - a `main` branch for production content
 - a `staging` branch with distinct placeholder content for easy environment verification
+- a zero-build default where most users only edit `pb_public/index.html` and `pb_public/assets/site.css`
 
 Use the template repository when you want a ready-made small-site starting point. Use this repository when you want the shared deployment logic, templates, and skill documentation.
 

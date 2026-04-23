@@ -1,3 +1,6 @@
+# Zero-build default:
+# most small sites should only edit pb_public/index.html and pb_public/assets/site.css.
+# Leave this workflow unchanged unless you need a different hosting model.
 name: Deploy to Pockethost via FTP
 
 on:
@@ -20,7 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     env:
+      POCKETHOST_ENVIRONMENT: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
       POCKETHOST_TENANT_ID: ${{ vars.POCKETHOST_TENANT_ID != '' && vars.POCKETHOST_TENANT_ID || secrets.POCKETHOST_TENANT_ID }}
+      HEALTHCHECK_BASE_URL: ${{ vars.HEALTHCHECK_BASE_URL }}
 
     steps:
       - name: Checkout current commit
@@ -88,6 +93,42 @@ jobs:
             echo "previous_sha=" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Validate GitHub Environment configuration
+        shell: bash
+        env:
+          POCKETHOST_FTP_USERNAME_CONFIG: ${{ secrets.POCKETHOST_FTP_USERNAME }}
+          POCKETHOST_FTP_PASSWORD_CONFIG: ${{ secrets.POCKETHOST_FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          missing=""
+
+          if [ "${{ steps.detect.outputs.has_pb_hooks }}" = "true" ] || [ "${{ steps.detect.outputs.has_pb_migrations }}" = "true" ] || [ "${{ steps.detect.outputs.has_pb_public }}" = "true" ]; then
+            if [ -z "${POCKETHOST_FTP_USERNAME_CONFIG:-}" ]; then
+              missing="${missing}\n- POCKETHOST_FTP_USERNAME (Environment secret)"
+            fi
+
+            if [ -z "${POCKETHOST_FTP_PASSWORD_CONFIG:-}" ]; then
+              missing="${missing}\n- POCKETHOST_FTP_PASSWORD (Environment secret)"
+            fi
+          fi
+
+          if [ "${{ steps.detect.outputs.has_pb_hooks }}" = "true" ] || [ "${{ steps.detect.outputs.has_pb_migrations }}" = "true" ]; then
+            if [ -z "${POCKETHOST_TENANT_ID:-}" ]; then
+              missing="${missing}\n- POCKETHOST_TENANT_ID (Environment variable or secret)"
+            fi
+          fi
+
+          if [ "${{ steps.detect.outputs.has_health }}" = "true" ] && [ -z "${HEALTHCHECK_BASE_URL:-}" ] && [ -z "${POCKETHOST_TENANT_ID:-}" ]; then
+            missing="${missing}\n- POCKETHOST_TENANT_ID or HEALTHCHECK_BASE_URL for make health"
+          fi
+
+          if [ -n "$missing" ]; then
+            echo "Missing GitHub Environment configuration for '${POCKETHOST_ENVIRONMENT}'." >&2
+            printf '%b\n' "$missing" >&2
+            exit 1
+          fi
+
       - name: Enforce Makefile CI contract
         if: steps.detect.outputs.has_makefile == 'true'
         shell: bash
@@ -146,9 +187,11 @@ jobs:
           if [ -n "${POCKETHOST_TENANT_ID:-}" ]; then
             echo "server_dir=${POCKETHOST_TENANT_ID}/pb_public/" >> "$GITHUB_OUTPUT"
             echo "mode=tenant" >> "$GITHUB_OUTPUT"
+            echo "Resolved pb_public FTP directory: ${POCKETHOST_TENANT_ID}/pb_public/"
           else
             echo "server_dir=pb_public/" >> "$GITHUB_OUTPUT"
             echo "mode=root" >> "$GITHUB_OUTPUT"
+            echo "Resolved pb_public FTP directory: pb_public/"
           fi
 
       - name: Deploy pb_hooks via FTP
@@ -183,7 +226,7 @@ jobs:
             **/node_modules/**
             README.md
 
-      - name: Deploy pb_public via FTP using tenant directory
+      - name: Deploy pb_public via FTP
         if: steps.detect.outputs.has_pb_public == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:

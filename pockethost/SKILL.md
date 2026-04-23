@@ -10,6 +10,7 @@ description: Use when setting up or updating Pockethost hosting and deployment w
 Use this skill for hosted deployment and runtime guidance specific to Pockethost.
 
 Prefer a simple branch-to-environment mapping with explicit secrets and a copyable workflow template instead of ad hoc CI logic.
+Default to a zero-build small-site model unless the repository clearly needs hooks, migrations, or a custom build.
 
 ## Workflow
 
@@ -36,6 +37,7 @@ Prefer a simple branch-to-environment mapping with explicit secrets and a copyab
 - Treat `health` as an optional target and run it only if present.
 - If health fails, rollback by redeploying the previous branch commit.
 - Keep the SPA routing mount separate from asset directories. If the frontend uses `/page`, bundles still belong under `pb_public/assets` or `pb_public/dist`.
+- For small static sites, assume the main user-editable files are `pb_public/index.html` and `pb_public/assets/site.css`.
 
 ## References
 

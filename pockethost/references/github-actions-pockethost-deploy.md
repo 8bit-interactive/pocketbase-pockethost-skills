@@ -25,6 +25,7 @@ This keeps the application repository almost configuration-free:
 - FTP sync state files are stored as flat files inside each deployed local directory
 - `pb_public` deployment resolves a single remote directory before uploading, which keeps GitHub Actions statuses clean
 - improvements to the shared template can be copied from this repository
+- the default small-site workflow is zero-build and expects most edits to stay inside `pb_public/`
 
 The standalone alias at [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) exists for clarity and mirrors the same template.
 
@@ -125,6 +126,8 @@ The standalone workflow template expects the consuming repository to provide:
 - GitHub Environments named `production` and `staging`
 - environment secrets named `POCKETHOST_FTP_USERNAME` and `POCKETHOST_FTP_PASSWORD`
 - `POCKETHOST_TENANT_ID` as an environment variable or secret
+
+The workflow now validates that configuration early and fails with an explicit GitHub Environment error message when it is incomplete.
 
 By default, the template rejects unsupported branches. The convention is intentionally strict:
 
