@@ -1,72 +1,95 @@
-# PocketBase Skills
+# PocketBase Pockethost Platform
 
-This repository contains reusable Codex skills for PocketBase and Pockethost projects.
+This repository now has one main goal: make PocketBase and Pockethost projects ultra-simple.
 
-Its goal is to capture the project-specific knowledge that is easy to forget, expensive to rediscover, or too operational to leave implicit in prompts. Instead of rewriting the same context for each task, the repository packages that context into focused skills with lean instructions, references, and templates.
+The main user-facing product is the npm package:
 
-## Why this repository exists
+- `pocketbase-pockethost`
 
-- Standardize how PocketBase and Pockethost tasks are handled.
-- Preserve runtime-specific knowledge such as PocketBase JavaScript and Goja constraints.
-- Provide copyable deployment templates for GitHub Actions and Pockethost FTP workflows.
-- Provide copyable `Makefile` templates for local PocketBase and Pockethost commands.
-- Provide local tooling to download PocketBase binaries and validate migrations before deployment.
-- Reduce prompt noise by moving stable operational knowledge into reusable skill folders.
+It is designed for:
 
-## Current skills
+- small zero-build sites served from `pb_public`
+- PocketBase projects that still need hooks and migrations
+- GitHub-based deploys
+- manual FTP deploys for people not using GitHub
 
-### `pocketbase`
+## What Lives In This Repository
 
-Use this skill for PocketBase application and runtime work, especially:
+### 1. Skills
 
-- PocketBase hooks and migrations
-- custom routes and auth flows
-- collection design and validation rules
-- debugging JavaScript executed by the embedded Goja runtime
-- SPA routing served from `pb_public`
-- browser-level validation with Playwright and `$playwright-cli`
-- downloading the right PocketBase binary for the current platform
-- validating migrations locally before deploying to Pockethost
-- copyable `Makefile` conventions for `install`, `migrate`, `lint`, `dev`, and `test`
+These folders keep the Codex guidance:
 
-This skill includes references for Goja behavior, SPA routing, local migration testing, and a copyable `Makefile` template.
+- `pocketbase/`
+- `pockethost/`
 
-The default SPA convention is:
+They still document conventions, but the preferred operational surface is now the CLI.
 
-- navigation lives under `/page`
-- `index.html` stays at the root of `pb_public`
-- compiled assets live under `/assets` or `/dist`
-- `pb_public/page/` is intentionally discouraged
+### 2. GitHub Workflow Templates
 
-### `pockethost`
+The repository still ships workflow guidance and templates for Pockethost deploys.
 
-Use this skill for Pockethost hosting and deployment work, especially:
+The preferred model is:
 
-- GitHub Actions FTP deployment
-- branch-based staging and production environments
-- Makefile-driven `lint`, `test`, `build`, and optional `health` checks
-- previous-commit rollback guidance after failed post-deploy health checks
-- Pockethost-specific hosting conventions and secrets
-- copyable `Makefile` conventions for local PocketBase tasks and hosted health checks
+- generate a local workflow in the consuming repo
+- let that workflow call the CLI
+- keep branch mapping convention-based
 
-This skill includes a ready-to-copy GitHub Actions workflow template, a copyable `Makefile`, and deployment guidance for Pockethost.
+### 3. Node CLI + Library
 
-## Repository layout
+The new automation core lives in:
 
-Each skill lives in its own directory and usually contains:
+- [packages/pocketbase-pockethost/package.json](/Users/evaisse/Sites/projects/pocketbase-pockethost-skills/packages/pocketbase-pockethost/package.json)
 
-- `SKILL.md` for activation and core instructions
-- `agents/openai.yaml` for UI-facing metadata
-- `references/` for detailed documentation loaded only when needed
-- `assets/` for reusable templates or files copied into downstream projects
+This package provides:
 
-## Intended use
+- project scaffolding
+- PocketBase binary management through `.pb_version`
+- local development commands
+- migration and hook generators
+- health checks
+- GitHub workflow generation
+- manual FTP deploys
 
-This repository is meant to grow as a focused library of PocketBase and Pockethost operational skills.
+## Default Project Model
 
-New skills should prefer:
+The default generated project keeps the existing PocketBase layout:
 
-- conventions over configuration
-- concise `SKILL.md` files
-- detailed material in `references/`
-- reusable templates in `assets/`
+- `pb_public/`
+- `pb_hooks/`
+- `pb_migrations/`
+
+The zero-build default is intentionally small:
+
+- edit `pb_public/index.html`
+- edit `pb_public/assets/site.css`
+- use `npm run dev`
+- push `staging`
+- then push `main`
+
+## CLI Commands
+
+The v1 command surface is:
+
+- `npx pocketbase-pockethost init`
+- `npx pocketbase-pockethost install`
+- `npx pocketbase-pockethost dev`
+- `npx pocketbase-pockethost test`
+- `npx pocketbase-pockethost doctor`
+- `npx pocketbase-pockethost health`
+- `npx pocketbase-pockethost deploy`
+- `npx pocketbase-pockethost ftp:deploy`
+- `npx pocketbase-pockethost workflow:install`
+- `npx pocketbase-pockethost migration:new <name>`
+- `npx pocketbase-pockethost hooks:new <name>`
+
+## Repository Direction
+
+The direction is now:
+
+- CLI first
+- convention over configuration
+- one config file: `.pb_config.json`
+- one PocketBase version file: `.pb_version`
+- Node/NPM as the only required user dependency
+
+Legacy copy-paste assets such as long `Makefile`-driven flows are kept only as transitional material while the CLI becomes the default path.
