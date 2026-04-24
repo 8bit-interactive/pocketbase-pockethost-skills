@@ -1,133 +1,95 @@
-# PocketBase Skills
+# PocketBase Pockethost Platform
 
-This repository contains reusable Codex skills for PocketBase and Pockethost projects.
+This repository now has one main goal: make PocketBase and Pockethost projects ultra-simple.
 
-Its goal is to capture the project-specific knowledge that is easy to forget, expensive to rediscover, or too operational to leave implicit in prompts. Instead of rewriting the same context for each task, the repository packages that context into focused skills with lean instructions, references, and templates.
+The main user-facing product is the npm package:
 
-## Why this repository exists
+- `pocketbase-pockethost`
 
-- Standardize how PocketBase and Pockethost tasks are handled.
-- Preserve runtime-specific knowledge such as PocketBase JavaScript and Goja constraints.
-- Provide copyable deployment templates for GitHub Actions and Pockethost FTP workflows.
-- Provide copyable `Makefile` templates for local PocketBase and Pockethost commands.
-- Provide local tooling to download PocketBase binaries and validate migrations before deployment.
-- Reduce prompt noise by moving stable operational knowledge into reusable skill folders.
+It is designed for:
 
-## Current skills
+- small zero-build sites served from `pb_public`
+- PocketBase projects that still need hooks and migrations
+- GitHub-based deploys
+- manual FTP deploys for people not using GitHub
 
-### `pocketbase`
+## What Lives In This Repository
 
-Use this skill for PocketBase application and runtime work, especially:
+### 1. Skills
 
-- PocketBase hooks and migrations
-- custom routes and auth flows
-- collection design and validation rules
-- debugging JavaScript executed by the embedded Goja runtime
-- SPA routing served from `pb_public`
-- browser-level validation with Playwright and `$playwright-cli`
-- downloading the right PocketBase binary for the current platform
-- validating migrations locally before deploying to Pockethost
-- copyable `Makefile` conventions for `install`, `migrate`, `lint`, `dev`, and `test`
+These folders keep the Codex guidance:
 
-This skill includes references for Goja behavior, SPA routing, local migration testing, and a copyable `Makefile` template.
+- `pocketbase/`
+- `pockethost/`
 
-The default SPA convention is:
+They still document conventions, but the preferred operational surface is now the CLI.
 
-- navigation lives under `/page`
-- `index.html` stays at the root of `pb_public`
-- compiled assets live under `/assets` or `/dist`
-- `pb_public/page/` is intentionally discouraged
+### 2. GitHub Workflow Templates
 
-### `pockethost`
+The repository still ships workflow guidance and templates for Pockethost deploys.
 
-Use this skill for Pockethost hosting and deployment work, especially:
+The preferred model is:
 
-- GitHub Actions FTP deployment
-- copyable GitHub Actions workflow templates hosted by this repository
-- branch-based staging and production environments
-- Makefile-driven `lint`, `test`, `build`, and optional `health` checks
-- previous-commit rollback guidance after failed post-deploy health checks
-- Pockethost-specific hosting conventions and secrets
-- copyable deployment workflow and `Makefile` conventions for local PocketBase tasks and hosted health checks
+- generate a local workflow in the consuming repo
+- let that workflow call the CLI
+- keep branch mapping convention-based
 
-This skill includes a centralized workflow template, a standalone deployment workflow, a copyable `Makefile`, and deployment guidance for Pockethost.
+### 3. Node CLI + Library
 
-## GitHub Actions Template
+The new automation core lives in:
 
-The default Pockethost deployment model is now:
+- [packages/pocketbase-pockethost/package.json](/Users/evaisse/Sites/projects/pocketbase-pockethost-skills/packages/pocketbase-pockethost/package.json)
 
-1. keep the deployment template centralized in this repository
-2. copy the standalone workflow into the application repository
-3. keep environment-specific secrets and vars in the consuming repository
-4. rely on branch conventions instead of local workflow customization
+This package provides:
 
-The copyable workflow template is published from:
+- project scaffolding
+- PocketBase binary management through `.pb_version`
+- local development commands
+- migration and hook generators
+- health checks
+- GitHub workflow generation
+- manual FTP deploys
 
-- `pockethost/assets/github-actions-pockethost-deploy.yml`
+## Default Project Model
 
-The default workflow is local to the consuming repository because GitHub Environment-scoped values are resolved reliably there:
+The default generated project keeps the existing PocketBase layout:
 
-```yaml
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
-```
+- `pb_public/`
+- `pb_hooks/`
+- `pb_migrations/`
 
-Default branch mapping:
+The zero-build default is intentionally small:
 
-- `main` -> GitHub Environment `production`
-- `master` -> GitHub Environment `production`
-- `staging` -> GitHub Environment `staging`
+- edit `pb_public/index.html`
+- edit `pb_public/assets/site.css`
+- use `npm run dev`
+- push `staging`
+- then push `main`
 
-Expected GitHub Environment configuration:
+## CLI Commands
 
-- `POCKETHOST_FTP_USERNAME`
-- `POCKETHOST_FTP_PASSWORD`
-- `POCKETHOST_TENANT_ID` as an Environment variable or secret
+The v1 command surface is:
 
-The workflow enforces a simple repository contract:
+- `npx pocketbase-pockethost init`
+- `npx pocketbase-pockethost install`
+- `npx pocketbase-pockethost dev`
+- `npx pocketbase-pockethost test`
+- `npx pocketbase-pockethost doctor`
+- `npx pocketbase-pockethost health`
+- `npx pocketbase-pockethost deploy`
+- `npx pocketbase-pockethost ftp:deploy`
+- `npx pocketbase-pockethost workflow:install`
+- `npx pocketbase-pockethost migration:new <name>`
+- `npx pocketbase-pockethost hooks:new <name>`
 
-- if a makefile exists, it must expose `lint`, `test`, and `build`
-- if `install` exists, it is run before `lint`, `test`, and `build`
-- `health` is optional
-- only directories that exist in the repository are deployed
+## Repository Direction
 
-For `pb_public`, the workflow resolves a single FTP target before deployment: it uses `${POCKETHOST_TENANT_ID}/pb_public/` when `POCKETHOST_TENANT_ID` is available, otherwise it uses `pb_public/`.
+The direction is now:
 
-## Companion Repositories
+- CLI first
+- convention over configuration
+- one config file: `.pb_config.json`
+- one PocketBase version file: `.pb_version`
+- Node/NPM as the only required user dependency
 
-This repository now has two companion repositories:
-
-- `8bit-interactive/pockethost-tools-demo`: a live consumer repository used to validate the deployment template end-to-end
-- `8bit-interactive/pockethost-site-template`: the starter template repository meant to be used via GitHub `Use this template`
-
-The template repository ships with:
-
-- a local deployment workflow copied from this repository
-- a `Makefile` matching the shared CI contract
-- a `main` branch for production content
-- a `staging` branch with distinct placeholder content for easy environment verification
-- a zero-build default where most users only edit `pb_public/index.html` and `pb_public/assets/site.css`
-
-Use the template repository when you want a ready-made small-site starting point. Use this repository when you want the shared deployment logic, templates, and skill documentation.
-
-## Repository layout
-
-Each skill lives in its own directory and usually contains:
-
-- `SKILL.md` for activation and core instructions
-- `agents/openai.yaml` for UI-facing metadata
-- `references/` for detailed documentation loaded only when needed
-- `assets/` for reusable templates or files copied into downstream projects
-
-## Intended use
-
-This repository is meant to grow as a focused library of PocketBase and Pockethost operational skills.
-
-New skills should prefer:
-
-- conventions over configuration
-- concise `SKILL.md` files
-- detailed material in `references/`
-- reusable templates in `assets/`
+Legacy copy-paste assets such as long `Makefile`-driven flows are kept only as transitional material while the CLI becomes the default path.

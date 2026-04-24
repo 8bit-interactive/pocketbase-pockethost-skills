@@ -1,0 +1,25 @@
+{
+  "name": "pocketbase-pockethost",
+  "version": "0.1.0",
+  "description": "Ultra-simple PocketBase and Pockethost automation CLI.",
+  "type": "module",
+  "bin": {
+    "pocketbase-pockethost": "./bin/pocketbase-pockethost.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "basic-ftp": "^5.0.5",
+    "extract-zip": "^2.0.1"
+  }
+}
+

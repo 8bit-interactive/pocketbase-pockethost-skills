@@ -1,0 +1,73 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { ensureDir, fileExists } from "./utils.js";
+
+export function renderDeployWorkflow() {
+  return `# Zero-build default:
+# most small sites should only edit pb_public/index.html and pb_public/assets/site.css.
+# Leave this workflow unchanged unless you need a different hosting model.
+name: Deploy to Pockethost
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - staging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pockethost-deploy-\${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: \${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    env:
+      POCKETHOST_FTP_USERNAME: \${{ secrets.POCKETHOST_FTP_USERNAME }}
+      POCKETHOST_FTP_PASSWORD: \${{ secrets.POCKETHOST_FTP_PASSWORD }}
+      POCKETHOST_TENANT_ID: \${{ vars.POCKETHOST_TENANT_ID != '' && vars.POCKETHOST_TENANT_ID || secrets.POCKETHOST_TENANT_ID }}
+      HEALTHCHECK_BASE_URL: \${{ vars.HEALTHCHECK_BASE_URL }}
+      GITHUB_REF_NAME: \${{ github.ref_name }}
+
+    steps:
+      - name: Checkout current commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate project and deploy configuration
+        run: npx pocketbase-pockethost doctor --strict --for deploy
+
+      - name: Run project checks
+        run: npx pocketbase-pockethost test
+
+      - name: Deploy project
+        run: npx pocketbase-pockethost deploy
+`;
+}
+
+export async function installWorkflow(projectRoot, { force = false } = {}) {
+  const workflowPath = path.join(projectRoot, ".github", "workflows", "deploy.yml");
+
+  if (!force && (await fileExists(workflowPath))) {
+    throw new Error(`Workflow already exists at ${workflowPath}. Use --force to overwrite it.`);
+  }
+
+  await ensureDir(path.dirname(workflowPath));
+  await fs.writeFile(workflowPath, renderDeployWorkflow(), "utf8");
+
+  return workflowPath;
+}
+

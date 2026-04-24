@@ -1,6 +1,6 @@
 ---
 name: pockethost
-description: Use when setting up or updating Pockethost hosting and deployment workflows, especially GitHub Actions FTP deployment, environment secrets, branch-based staging and production, Makefile-driven checks, and previous-commit rollback guidance.
+description: Use when setting up or updating Pockethost hosting and deployment workflows, especially GitHub Actions deployment, FTP deployment, branch-based staging and production, and the pocketbase-pockethost CLI.
 ---
 
 # Pockethost
@@ -9,19 +9,25 @@ description: Use when setting up or updating Pockethost hosting and deployment w
 
 Use this skill for hosted deployment and runtime guidance specific to Pockethost.
 
-Prefer a simple branch-to-environment mapping with explicit secrets and a copyable workflow template instead of ad hoc CI logic.
-Default to a zero-build small-site model unless the repository clearly needs hooks, migrations, or a custom build.
+The preferred operational surface is now the `pocketbase-pockethost` CLI.
+
+Default assumptions:
+
+- zero-build small site first
+- `pb_public/` is the normal user-editable surface
+- `pb_hooks/` and `pb_migrations/` are supported but optional
+- GitHub-first deployment, with manual FTP as an official path
 
 ## Workflow
 
-1. Confirm the repository is deployed to Pockethost over FTP.
-2. Use GitHub Environments named `production` and `staging`.
-3. Store `POCKETHOST_FTP_USERNAME` and `POCKETHOST_FTP_PASSWORD` as environment secrets.
-4. Store `POCKETHOST_TENANT_ID` as an environment variable or secret.
-5. Copy the standalone workflow template from [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml).
-6. Keep [../.github/workflows/pockethost-deploy.yml](../.github/workflows/pockethost-deploy.yml) only as a centralized reference workflow.
-7. Use [assets/Makefile](assets/Makefile) as the default local `Makefile` template when the project needs `install`, `migrate`, `lint`, `dev`, `test`, `build`, and `health` targets.
-8. Read [references/github-actions-pockethost-deploy.md](references/github-actions-pockethost-deploy.md) before adapting the template.
+1. Confirm the project follows the standard layout: `pb_public`, `pb_hooks`, `pb_migrations`.
+2. Prefer `npx pocketbase-pockethost init` for new projects.
+3. Prefer `npx pocketbase-pockethost workflow:install` over hand-editing workflows.
+4. Prefer `npx pocketbase-pockethost doctor`, `health`, `test`, and `deploy` over long local shell glue.
+5. Use GitHub Environments named `production` and `staging`.
+6. Store `POCKETHOST_FTP_USERNAME` and `POCKETHOST_FTP_PASSWORD` as environment secrets.
+7. Store `POCKETHOST_TENANT_ID` as an environment variable or secret.
+8. Keep `.pb_version` as the source of truth for the PocketBase version.
 9. For PocketBase application logic, hooks, SPA routing, or local migration validation, use `$pocketbase`.
 
 ## Deployment Rules
@@ -29,21 +35,17 @@ Default to a zero-build small-site model unless the repository clearly needs hoo
 - Deploy `main` to `production`.
 - Deploy `master` to `production`.
 - Deploy `staging` to `staging`.
-- Default to the local workflow template copied from this repository.
+- Default to a local GitHub workflow generated into the consuming repository.
+- Treat manual FTP deploy as a first-class non-GitHub path.
 - Keep the FTP secret names identical across environments.
 - Resolve `POCKETHOST_TENANT_ID` from environment vars before falling back to environment secrets.
-- If a makefile exists, require `lint`, `test`, and `build` before deployment.
-- If an `install` target exists, run it before `lint`, `test`, and `build`.
-- Treat `health` as an optional target and run it only if present.
-- If health fails, rollback by redeploying the previous branch commit.
-- Keep the SPA routing mount separate from asset directories. If the frontend uses `/page`, bundles still belong under `pb_public/assets` or `pb_public/dist`.
 - For small static sites, assume the main user-editable files are `pb_public/index.html` and `pb_public/assets/site.css`.
+- Keep the SPA routing mount separate from asset directories. If the frontend uses `/page`, bundles still belong under `pb_public/assets` or `pb_public/dist`.
 
 ## References
 
 - [references/github-actions-pockethost-deploy.md](references/github-actions-pockethost-deploy.md): Detailed setup notes and workflow behavior.
-- [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml): Canonical standalone workflow template for downstream repositories.
-- [../.github/workflows/pockethost-deploy.yml](../.github/workflows/pockethost-deploy.yml): Central reusable GitHub Actions workflow kept as a reference.
-- [assets/github-actions-pockethost-deploy-standalone.yml](assets/github-actions-pockethost-deploy-standalone.yml): Alias of the standalone workflow template.
-- [assets/Makefile](assets/Makefile): Copyable Makefile template with local PocketBase tasks and optional hosted health checks.
+- [assets/github-actions-pockethost-deploy.yml](assets/github-actions-pockethost-deploy.yml): Transitional GitHub workflow template material.
+- [assets/Makefile](assets/Makefile): Legacy Makefile reference during the CLI transition.
+- [../packages/pocketbase-pockethost/package.json](../packages/pocketbase-pockethost/package.json): CLI package entrypoint.
 - `$pocketbase`: PocketBase runtime, testing, and local migration validation guidance.

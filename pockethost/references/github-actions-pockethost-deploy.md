@@ -1,181 +1,83 @@
 # GitHub Actions Deployment for Pockethost
 
-Use this reference when a repository needs a standard GitHub Actions workflow for deploying to Pockethost over FTP.
+Use this reference when a repository needs a standard GitHub Actions workflow for deploying to Pockethost.
 
-The canonical templates live in:
+## Current Direction
 
-- [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml)
-- [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml)
-- [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml)
-- [assets/Makefile](../assets/Makefile)
+The preferred model is no longer:
 
-## Default Consumption Model
+- copy a long workflow
+- copy a long `Makefile`
+- maintain shell logic in every project
 
-The default convention is to keep the deployment template centralized in this repository and copy the standalone workflow into the application repository.
+The preferred model is now:
 
-Use [assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml) in downstream repositories.
-It is intentionally local to the consuming repository so GitHub Environment-scoped secrets and vars are resolved directly by the job.
+1. scaffold or maintain the project with `pocketbase-pockethost`
+2. generate a local workflow in the consuming repository
+3. let GitHub Actions call the CLI for `doctor`, `test`, and `deploy`
 
-This keeps the application repository almost configuration-free:
+## Project Conventions
 
-- branch mapping stays standardized
-- FTP deployment behavior stays standardized
-- rollback behavior stays standardized
-- Makefile contract stays standardized
-- FTP sync state files are stored as flat files inside each deployed local directory
-- `pb_public` deployment resolves a single remote directory before uploading, which keeps GitHub Actions statuses clean
-- improvements to the shared template can be copied from this repository
-- the default small-site workflow is zero-build and expects most edits to stay inside `pb_public/`
+Default conventions:
 
-The standalone alias at [assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml) exists for clarity and mirrors the same template.
+- `main` -> GitHub Environment `production`
+- `master` -> GitHub Environment `production`
+- `staging` -> GitHub Environment `staging`
+- `pb_public/` is the main static site surface
+- `pb_hooks/` and `pb_migrations/` are optional
+- `.pb_version` pins the PocketBase version
+- `.pb_config.json` is the single explicit project config file
 
-## Deployment Model
+## Required GitHub Environment Configuration
 
-This skill standardizes the following rules:
+For both `production` and `staging`, configure:
 
-- `main` deploys to the GitHub Environment `production`
-- `master` deploys to the GitHub Environment `production`
-- `staging` deploys to the GitHub Environment `staging`
-- each environment stores the same FTP secret names:
-  - `POCKETHOST_FTP_USERNAME`
-  - `POCKETHOST_FTP_PASSWORD`
-- each environment stores `POCKETHOST_TENANT_ID` as a variable or secret
-
-The workflow uploads to the Pockethost tenant folder:
-
-```text
-${POCKETHOST_TENANT_ID}/pb_hooks/
-${POCKETHOST_TENANT_ID}/pb_migrations/
-${POCKETHOST_TENANT_ID}/pb_public/
-```
-
-## Local Validation Before Deploy
-
-Pockethost deployment and local PocketBase validation solve different problems.
-
-- use this skill for GitHub Actions and FTP deployment to Pockethost
-- use `$pocketbase` to download a local PocketBase binary and run migrations before deployment
-- use [assets/Makefile](../assets/Makefile) as the default project contract for `install`, `migrate`, `lint`, `dev`, `test`, `build`, and `health`
-
-This split keeps deployment automation simple while still making it easy to validate migration behavior on the current platform before pushing a change.
-
-## Pre-deploy Checks
-
-If the repository contains `Makefile`, `makefile`, or `GNUmakefile`, the workflow treats it as an explicit CI contract and will:
-
-1. verify that `lint`, `test`, and `build` targets exist
-2. run `make install` when that target exists
-3. run `make lint`
-4. run `make test`
-5. run `make build`
-
-If the repository has no makefile, all Make-based steps are skipped.
-
-`make health` is optional:
-
-- if the target exists, the workflow waits 5 seconds after deployment and runs it
-- if the target does not exist, the workflow skips the health check
-- the default template resolves the instance URL from `HEALTHCHECK_BASE_URL` or `POCKETHOST_TENANT_ID`
-
-## Rollback Behavior
-
-Rollback is based on the previous pushed commit of the same branch.
-
-Behavior:
-
-1. deploy the current commit
-2. wait 5 seconds
-3. if `make health` exists, run it
-4. if health fails, checkout `github.event.before`
-5. rerun `make install` if the previous commit exposes that target
-6. rebuild the previous commit if a makefile exists
-7. rerun the same FTP sync steps
-8. fail the workflow to keep the failed deployment visible
-
-Important limitations:
-
-- this is a best-effort restore of the previous branch commit
-- it is not a transactional deployment
-- on a branch's first push, `github.event.before` may be unavailable or all-zeroes, so rollback cannot run
-- rollback reliability depends on the previous commit still building successfully
-
-## Directory Assumptions
-
-The template does not require all deployable folders to exist.
-
-It detects these directories and only uploads the ones present:
-
-- `pb_hooks/`
-- `pb_migrations/`
-- `pb_public/`
-
-This makes the template usable for:
-
-- PocketBase-only repositories
-- frontend-only repositories publishing into `pb_public`
-- mixed repositories combining hooks, migrations, and public assets
-
-If the frontend uses the PocketBase SPA routing convention, keep `/page` reserved for navigation and emit compiled files under `pb_public/assets/` or `pb_public/dist/`.
-
-The copyable `Makefile` template enforces this by failing if `pb_public/page/` exists physically.
-
-## Template Contract
-
-The standalone workflow template expects the consuming repository to provide:
-
-- GitHub Environments named `production` and `staging`
-- environment secrets named `POCKETHOST_FTP_USERNAME` and `POCKETHOST_FTP_PASSWORD`
+- `POCKETHOST_FTP_USERNAME` as an environment secret
+- `POCKETHOST_FTP_PASSWORD` as an environment secret
 - `POCKETHOST_TENANT_ID` as an environment variable or secret
 
-The workflow now validates that configuration early and fails with an explicit GitHub Environment error message when it is incomplete.
+Optional:
 
-By default, the template rejects unsupported branches. The convention is intentionally strict:
+- `HEALTHCHECK_BASE_URL` as an environment variable when the public URL should not be derived from the tenant ID
 
-- `main` and `master` are the only production branches
-- `staging` is the only staging branch
+## Workflow Behavior
 
-## Central Reusable Workflow
+The generated workflow should:
 
-The reusable workflow in [../../.github/workflows/pockethost-deploy.yml](../../.github/workflows/pockethost-deploy.yml) is still kept in this repository as a centralized reference.
+1. check out the repository
+2. install Node dependencies
+3. run `pocketbase-pockethost doctor --strict --for deploy`
+4. run `pocketbase-pockethost test`
+5. run `pocketbase-pockethost deploy`
 
-Use it only when the consuming repository does not need GitHub Environment-scoped values from the caller.
+This keeps the workflow very small and pushes the real logic into the CLI.
 
-## Adapting the Template
+## Why This Is Better
 
-Keep these parts unchanged unless the hosting setup really differs:
+Compared with the previous shell-heavy approach:
 
-- FTP server host: `ftp.pockethost.io`
-- secret names
-- branch to environment mapping
-- tenant-based remote directory layout
+- fewer project files need manual editing
+- fewer long workflow branches live in YAML
+- local and CI deploys share the same deploy engine
+- PocketBase version management moves into `.pb_version`
+- GitHub failures become easier to explain because `doctor` fails early with configuration-specific messages
 
-Adjust only when needed:
+## FTP Deployment Rules
 
-- repository ref in the caller workflow, preferably pinned to a release tag or commit SHA
-- `working-directory` if the application does not live at the repository root
-- build implementation inside `make build`
-- health logic inside `make health`
-- additional exclusions for uploaded directories
+The CLI deploy behavior should stay convention-based:
 
-## Expected GitHub Configuration
+- `pb_public` uploads to `${POCKETHOST_TENANT_ID}/pb_public/` when a tenant ID is available
+- otherwise `pb_public` uploads to `pb_public/`
+- `pb_hooks` and `pb_migrations` require a tenant-scoped path
 
-Create these GitHub Environments:
+Manual FTP deploy stays supported for users who do not use GitHub.
 
-- `production`
-- `staging`
+## Transitional Assets
 
-Add these secrets to each environment:
+These files remain in the repository during the transition:
 
-```text
-POCKETHOST_FTP_USERNAME
-POCKETHOST_FTP_PASSWORD
-```
+- [../assets/github-actions-pockethost-deploy.yml](../assets/github-actions-pockethost-deploy.yml)
+- [../assets/github-actions-pockethost-deploy-standalone.yml](../assets/github-actions-pockethost-deploy-standalone.yml)
+- [../assets/Makefile](../assets/Makefile)
 
-Add `POCKETHOST_TENANT_ID` as either:
-
-```text
-an Environment variable
-or an Environment secret
-```
-
-The workflow template intentionally uses environment-scoped configuration rather than per-repository suffixed names.
+Treat them as compatibility material, not the long-term center of the product.
